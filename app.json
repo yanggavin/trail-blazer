@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Trail Blazer",
+    "slug": "trail-blazer",
+    "version": "0.1.0",
+    "scheme": "trailblazer",
+    "orientation": "portrait",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gavinyang.trailblazer",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Trail Blazer uses the camera to capture geo-tagged photos during your runs.",
+        "NSPhotoLibraryAddUsageDescription": "Trail Blazer saves photos you capture during your runs.",
+        "NSPhotoLibraryUsageDescription": "Trail Blazer accesses your photo library to attach photos to your runs.",
+        "NSLocationWhenInUseUsageDescription": "Trail Blazer uses your location to track distance and pace during runs."
+      }
+    },
+    "android": {},
+    "web": { "bundler": "metro" }
+  }
+}

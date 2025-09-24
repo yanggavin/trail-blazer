@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#17cf17",
+            "background-light": "#f6f8f6",
+            "background-dark": "#112111",
+          },
+          fontFamily: {
+            "display": ["Space Grotesk"]
+          },
+          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex flex-col min-h-screen">
+<header class="flex items-center justify-between p-4 bg-background-light dark:bg-background-dark/80 backdrop-blur-sm sticky top-0 z-10">
+<div class="w-12"></div>
+<h1 class="text-lg font-bold text-gray-900 dark:text-gray-100 text-center flex-1">Trail Tracker</h1>
+<div class="w-12 flex justify-end">
+<button class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-primary/20 hover:dark:bg-primary/30">
+<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M216.49,101.49,198.15,83.15a63.51,63.51,0,0,0-15.6-15.6L164.21,49.21a16,16,0,0,0-22.62,0L116.8,74,90.41,47.59a16,16,0,0,0-22.62,0L49.21,66.17a16,16,0,0,0,0,22.62L74,113.59l-26.41,26.4A16,16,0,0,0,49.21,162.6l18.58,18.58a63.51,63.51,0,0,0,15.6,15.6L101.73,215.12c.16.16.31.32.48.47a16,16,0,0,0,22.62,0l24.79-24.79,26.39,26.4a16,16,0,0,0,22.62,0l18.58-18.58a16,16,0,0,0,0-22.62L194,142.41l22.41-22.42a16,16,0,0,0,.08-22.62Zm-21.94,30.34L182.13,144.25a16,16,0,0,0-22.62,0L136,167.77,105.74,137.52a8,8,0,0,0-11.31,0L64,167.9V88.1L94.26,57.85a8,8,0,0,0,11.31,0L128,80.23,158.26,49.92a8,8,0,0,0-1.87-12.19l.34-.33,17.47-17.48,11.31,11.32a47.5,47.5,0,0,1,11.7,11.7l11.32,11.31Zm-49.86,52.3L136,175.43,154.55,194l-11.31,11.31-17.48-17.47.2-.21c-2-1.46-4-1.28-5.3.05l-30.26,30.25-11.31-11.31,30.25-30.25a8,8,0,0,0,.05-5.3l-.21.2-17.47-17.48,11.31-11.31Z M128,128a16,16,0,1,1,16,16A16,16,0,0,1,128,128Z"></path></svg>
+</button>
+</div>
+</header>
+<main class="flex-grow p-4 space-y-6">
+<div class="w-full bg-center bg-no-repeat aspect-[16/10] bg-cover rounded-lg" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDp4iiXh2tvmRtnR8xGsniRkD6TpOd1S2qpvRZcq1hrNUPH1LHkqM5qRzcpo8HcTb76FMhfWA1_4xluRgRT4uEecS12e_1sWZHQJ52iVq-8aMoqrkiwtyQUt-n2_egxM9ZgcWM3b_P5Dh1nl_MYHLPt2YpzBw_rboqK-rP9hYRmTYVuA8epglJQWLbtfPx8-prvc-7WBKbe0M398XHgjPwnAxNIxZpTU3eOhnLA3KMk8Fw_JkdFlBjoC80lpUOHRRyycFZytnBbXJo");'></div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+<div class="flex flex-col gap-1 rounded p-4 bg-background-dark/5 dark:bg-background-light/5">
+<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Distance</p>
+<p class="text-2xl font-bold text-gray-900 dark:text-white">0.0 mi</p>
+</div>
+<div class="flex flex-col gap-1 rounded p-4 bg-background-dark/5 dark:bg-background-light/5">
+<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Duration</p>
+<p class="text-2xl font-bold text-gray-900 dark:text-white">00:00:00</p>
+</div>
+<div class="flex flex-col col-span-2 md:col-span-1 gap-1 rounded p-4 bg-background-dark/5 dark:bg-background-light/5">
+<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pace</p>
+<p class="text-2xl font-bold text-gray-900 dark:text-white">00:00 /mi</p>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="flex-1 flex items-center justify-center rounded-full h-14 px-6 bg-primary text-background-dark font-bold text-lg">
+          Start Run
+        </button>
+<button class="flex-shrink-0 flex items-center justify-center rounded-full h-14 w-14 bg-primary/20 dark:bg-primary/30 text-primary">
+<svg fill="currentColor" height="28" viewBox="0 0 256 256" width="28" xmlns="http://www.w3.org/2000/svg"><path d="M208,56H180.28l-8.6-20.08A16,16,0,0,0,156.4,24H99.6a16,16,0,0,0-15.28,11.92L75.72,56H48a24,24,0,0,0-24,24V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8h32a8,8,0,0,0,8-8l8.6-20.08a.19.19,0,0,1,0-.08c.11-.26.22-.51.35-.75l.13-.23.07-.1a1.2,1.2,0,0,1,.18-.24A1.33,1.33,0,0,1,99.6,40h56.8c.05,0,.1,0,.15,0l.13.05.15.06a.83.83,0,0,1,.18.1.58.58,0,0,1,.12.1c.14.16.27.35.39.55l.07.12.13.23.06.12a.19.19,0,0,1,0,.08L168,64a8,8,0,0,0,8,8h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"></path></svg>
+</button>
+</div>
+</main>
+<footer class="sticky bottom-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-t border-black/10 dark:border-white/10">
+<nav class="flex justify-around p-2">
+<a class="flex flex-col items-center justify-end gap-1 text-primary w-20" href="#">
+<div class="flex items-center justify-center h-8">
+<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M228.92,49.69a8,8,0,0,0-6.86-1.45L160.93,63.52,99.58,32.84a8,8,0,0,0-5.52-.6l-64,16A8,8,0,0,0,24,56V200a8,8,0,0,0,9.94,7.76l61.13-15.28,61.35,30.68A8.15,8.15,0,0,0,160,224a8,8,0,0,0,1.94-.24l64-16A8,8,0,0,0,232,200V56A8,8,0,0,0,228.92,49.69ZM96,176a8,8,0,0,0-1.94.24L40,189.75V62.25L95.07,48.48l.93.46Zm120,17.75-55.07,13.77-.93-.46V80a8,8,0,0,0,1.94-.23L216,66.25Z"></path></svg>
+</div>
+<p class="text-xs font-medium">Track</p>
+</a>
+<a class="flex flex-col items-center justify-end gap-1 text-gray-500 dark:text-gray-400 hover:text-primary w-20" href="#">
+<div class="flex items-center justify-center h-8">
+<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M136,80v43.47l36.12,21.67a8,8,0,0,1-8.24,13.72l-40-24A8,8,0,0,1,120,128V80a8,8,0,0,1,16,0Zm-8-48A95.44,95.44,0,0,0,60.08,60.15C52.81,67.51,46.35,74.59,40,82V64a8,8,0,0,0-16,0v40a8,8,0,0,0,8,8H72a8,8,0,0,0,0-16H49c7.15-8.42,14.27-16.35,22.39-24.57a80,80,0,1,1,1.66,114.75,8,8,0,1,0-11,11.64A96,96,0,1,0,128,32Z"></path></svg>
+</div>
+<p class="text-xs font-medium">History</p>
+</a>
+<a class="flex flex-col items-center justify-end gap-1 text-gray-500 dark:text-gray-400 hover:text-primary w-20" href="#">
+<div class="flex items-center justify-center h-8">
+<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z"></path></svg>
+</div>
+<p class="text-xs font-medium">Photos</p>
+</a>
+</nav>
+</footer>
+</div>
+
+</body></html>

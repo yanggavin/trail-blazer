@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Trail Tracker Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#4A6C4A",
+            "primary-light": "#6E936E",
+            "secondary": "#F2B807",
+            "background-light": "#FDFDFC",
+            "background-dark": "#1A1C19",
+            "text-light": "#1A1C19",
+            "text-dark": "#E2E3DE",
+            "surface-light": "#F0F2EC",
+            "surface-dark": "#2E312D"
+          },
+          fontFamily: {
+            "display": ["Figtree", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "1rem",
+            "lg": "1.5rem",
+            "xl": "2rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+<div class="flex flex-col min-h-screen">
+<div class="relative flex-grow flex flex-col">
+<div class="absolute inset-0">
+<img alt="A scenic trail run view." class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqEFhtSsvAZWZRiMpKEEPNcJa7Pa_FCRXbEhc7Yxq6ZgjGO3T8_Aooy6SZqqDqGvlzmfjo5skluOQ2TecaOJRsY3ujZ5WDhbfdjyKulnViuS2k-sxWxfGbw_IYaTg9Xywi9ahbBWaiueaoAuHd0daFzl5oAkH4gwBBAtGc_nxB2HT2ARyrb3eWkjaFWzcOjUlhz1QIng28MlREpbyhcCa2oLpTlZTHedCDMA2IgL9rRMsElOKvV_maX_OMqoeAg4OeEKgdxXUm6JM"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent"></div>
+</div>
+<div class="relative z-10 flex flex-col justify-end flex-grow px-6 pt-16 pb-8 text-white text-center">
+<div class="flex justify-center mb-6">
+<div class="bg-white/20 p-3 rounded-full backdrop-blur-sm">
+<span class="material-symbols-outlined text-white text-5xl">
+                forest
+                </span>
+</div>
+</div>
+<h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4 text-shadow">Trail. Track. Treasure.</h1>
+<p class="text-lg text-white/90 max-w-md mx-auto">Your ultimate companion for trail running. Effortlessly track your runs and capture memories along the way.</p>
+</div>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-6 rounded-t-xl -mt-6 relative z-20">
+<div class="grid grid-cols-2 gap-4 text-center mb-6">
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-lg flex flex-col items-center">
+<span class="material-symbols-outlined text-primary dark:text-primary-light text-3xl mb-2">route</span>
+<p class="font-medium text-sm">Effortless Tracking</p>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-lg flex flex-col items-center">
+<span class="material-symbols-outlined text-primary dark:text-primary-light text-3xl mb-2">photo_camera</span>
+<p class="font-medium text-sm">Geo-tagged Photos</p>
+</div>
+</div>
+<button class="w-full h-14 bg-primary text-white font-bold rounded-full text-lg tracking-wide hover:bg-primary-light transition-colors flex items-center justify-center gap-2">
+<span>Get Started</span>
+<span class="material-symbols-outlined">
+      arrow_forward
+      </span>
+</button>
+<p class="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">Already have an account? <a class="font-semibold text-primary dark:text-primary-light" href="#">Sign In</a></p>
+</div>
+</div>
+
+</body></html>

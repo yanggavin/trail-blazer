@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#17cf17",
+              "background-light": "#f6f8f6",
+              "background-dark": "#112111",
+            },
+            fontFamily: {
+              display: ["Space Grotesk"],
+            },
+            borderRadius: {
+              DEFAULT: "1rem",
+              lg: "2rem",
+              xl: "3rem",
+              full: "9999px"
+            },
+          },
+        },
+      };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200">
+<div class="flex h-screen flex-col">
+<header class="flex-shrink-0 p-4">
+<div class="flex items-center justify-between">
+<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Run History</h1>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-background-light dark:bg-background-dark/50">
+<span class="material-symbols-outlined"> filter_list </span>
+</button>
+</div>
+<div class="relative mt-4">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"> search </span>
+<input class="w-full rounded-full border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-800 py-2 pl-10 pr-4 focus:border-primary focus:ring-primary" placeholder="Search runs..." type="text"/>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto px-4 pb-6">
+<div class="space-y-4">
+<a class="flex items-center gap-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800/50" href="#">
+<div class="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md">
+<img alt="Route map thumbnail" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcZ8Ju0uKKMlfYjW3MpG4eeN-l98uA0b6WQb05j6MPpdlEcRvrCH6i_AT2Dq_1rfTY8xjfx3TG8sFzcvF90rxZdLc3HwNRfRr2tGp1eicezHsw9nRiYGLKpc36Ajsv91B9sLNL-AtRfpdGt9KtnCdcbz11o-xZIfcpwLogVyYLv7CGT2w67QkJ0phGcD2gkiA0m97QBnqf-p1prFLjR0sNXYrXRzYfAxcfoc-n8hAUxpp4rWLKdcglUs1Maq7hWH4W4GGU4sw6k0E"/>
+</div>
+<div class="flex-1">
+<p class="font-bold text-gray-900 dark:text-white">Forest Trail Run</p>
+<p class="text-sm text-gray-600 dark:text-gray-300">Oct 26, 2023</p>
+<div class="mt-1 flex items-center gap-4 text-sm text-gray-800 dark:text-gray-200">
+<span>
+<span class="font-semibold">5.2</span> mi
+                </span>
+<span>
+<span class="font-semibold">45</span> min
+                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400"> chevron_right </span>
+</a>
+<a class="flex items-center gap-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800/50" href="#">
+<div class="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md">
+<img alt="Representative photo" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5aNv11khUahlD74IOzirJPJ6rGrchwE8pL2oRiPs32ZNT-ClT93SdU2yIT41b0znlGQCrEwO14R6Z4GFGlpgC65MCRRGM2oFTX1n0x7tX_WH97LXOc76pimWH-cMDppprX7yzF1pfkNWYbJ2wW_mMdwVHrziAQcrahzvN3hchLf0rVFPmRGwEBvVAnvm3vi4sHLcNOg8um7To5Ge41NA4FGbonWwnfu0Eo2YxvY5ZTkxIK2Ni6C13ljV3Oj8AbaOnuHjgwoaqTvc"/>
+</div>
+<div class="flex-1">
+<p class="font-bold text-gray-900 dark:text-white">Sunrise Hill Climb</p>
+<p class="text-sm text-gray-600 dark:text-gray-300">Oct 24, 2023</p>
+<div class="mt-1 flex items-center gap-4 text-sm text-gray-800 dark:text-gray-200">
+<span>
+<span class="font-semibold">3.1</span> mi
+                </span>
+<span>
+<span class="font-semibold">28</span> min
+                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400"> chevron_right </span>
+</a>
+<a class="flex items-center gap-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800/50" href="#">
+<div class="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md">
+<img alt="Route map thumbnail" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1NJWwCWR7Y30ca7Tc1ar361YsQWqjaern0pfgSWL0Wuwi2GsR2IKONy7P2DnlCHJn-MRkrI_J8L5E_N4WUSZtxwJ2R3QbX0bOFsxCyPTO99GzUFGMmcxtFtnBOvjQWl3udaiMdjuM_20E2dQlVX3Qxr1WY7cb6IStTseGd0UxleUtUgKexwM3sVyFWoyex5CouHGKSxJ-YUKFJnk7yVcWkruliId9AXlVr9j5RfBsXMnb62eKIsbkHdI-Fo6sV4ctjTLt38PWTeg"/>
+</div>
+<div class="flex-1">
+<p class="font-bold text-gray-900 dark:text-white">Lakeside Loop</p>
+<p class="text-sm text-gray-600 dark:text-gray-300">Oct 21, 2023</p>
+<div class="mt-1 flex items-center gap-4 text-sm text-gray-800 dark:text-gray-200">
+<span>
+<span class="font-semibold">7.5</span> mi
+                </span>
+<span>
+<span class="font-semibold">62</span> min
+                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400"> chevron_right </span>
+</a>
+<a class="flex items-center gap-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800/50" href="#">
+<div class="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md">
+<img alt="Representative photo" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBj8VyB0d8WkuJ9saaoDU3JOtuVqdIrN9Xv9xeAONyjmT-auN-gkC2ZG60fQYub4pf7m4rcf7-_nNeEkBaWb020aeLu120k0S_7L7eqtrxb0WG3-_K01R5fZx6f5mPLe3OAv2Su2U9Mf3CorRZPiLMvx5GWw1YFh2h6RKaYQ4IdRuywqhC3vk3vHHnJn__-EPlb9y9iH7kbwsnlb8OYJVB9i5uO_MUg5TVCh8nq5WcJLWSqxOUybUVuAkUBUE8LT8-w7Kyvv1DZJ_E"/>
+</div>
+<div class="flex-1">
+<p class="font-bold text-gray-900 dark:text-white">City Park Jaunt</p>
+<p class="text-sm text-gray-600 dark:text-gray-300">Oct 19, 2023</p>
+<div class="mt-1 flex items-center gap-4 text-sm text-gray-800 dark:text-gray-200">
+<span>
+<span class="font-semibold">4.0</span> mi
+                </span>
+<span>
+<span class="font-semibold">35</span> min
+                </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400"> chevron_right </span>
+</a>
+</div>
+</main>
+<footer class="flex-shrink-0 border-t border-primary/20 bg-background-light dark:bg-background-dark/50">
+<nav class="flex items-center justify-around p-2">
+<a class="flex flex-col items-center gap-1 p-2 text-gray-500 dark:text-gray-400" href="#">
+<span class="material-symbols-outlined"> map </span>
+<span class="text-xs">Track</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-primary" href="#">
+<span class="material-symbols-outlined"> history </span>
+<span class="text-xs font-bold">History</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-gray-500 dark:text-gray-400" href="#">
+<span class="material-symbols-outlined"> photo_library </span>
+<span class="text-xs">Photos</span>
+</a>
+</nav>
+</footer>
+</div>
+
+</body></html>

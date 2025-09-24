@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<title>Trailblazer Onboarding</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#17cf17",
+            "background-light": "#f6f8f6",
+            "background-dark": "#112111",
+          },
+          fontFamily: {
+            "display": ["Space Grotesk"]
+          },
+          borderRadius: {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex flex-col min-h-screen">
+<div class="flex-grow">
+<div class="relative h-80">
+<img alt="Lush green trail in a forest" class="absolute inset-0 w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfgZrSZAZwj5Qi1S2Cm8AlK9dYlyd5WmeAOel_J0nYgNEGQCB8USfvbVauiPOL7KB-twIfbeaLRLa3naoedD6lxis-1L0OlrIAJ5swWKtdCDymp3uWHA77VqxNNNV5SujmpC6VgtmFa1e1xOMmd-ZKP7lw6CpNwMR4HMWh2dE_AWzADBf8JkQGVh1KpFnxhFxV1XA1ntd1H0NPQgu0Oo7hk0Fh2EtGqNp3sZcGntLKfxcm6Zv0Gx4sqYpDUDdDSIJtY7BZUun08l8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent"></div>
+</div>
+<div class="px-6 py-8 text-center text-white">
+<h1 class="text-3xl font-bold">Welcome to Trailblazer</h1>
+<p class="mt-2 text-base text-white/80">Discover, track, and share your trail running adventures with a vibrant community.</p>
+</div>
+</div>
+<div class="px-6 pb-8 pt-4">
+<div class="flex flex-col space-y-4">
+<button class="flex items-center justify-center w-full h-14 px-6 rounded-full bg-primary text-background-dark text-lg font-bold">
+          Get Started
+        </button>
+<button class="flex items-center justify-center w-full h-14 px-6 rounded-full bg-primary/20 dark:bg-primary/30 text-white text-lg font-bold">
+          Skip
+        </button>
+</div>
+<div class="flex justify-center items-center space-x-2 mt-8 mb-4">
+<div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary/30"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary/30"></div>
+</div>
+</div>
+</div>
+
+</body></html>
