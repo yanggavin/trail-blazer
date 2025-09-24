@@ -2,6 +2,85 @@ import { create } from 'zustand';
 
 export type RunStatus = 'idle' | 'running' | 'paused' | 'finished';
 
+interface LocationPoint {
+  latitude: number;
+  longitude: number;
+  altitude?: number;
+  accuracy?: number;
+  timestamp: number;
+}
+
+// Haversine formula to calculate distance between two GPS points
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000; // Earth's radius in meters
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // Distance in meters
+}
+
+// Calculate total distance from array of GPS points
+function calculateTotalDistance(points: LocationPoint[]): number {
+  if (points.length < 2) return 0;
+  
+  let totalDistance = 0;
+  for (let i = 1; i < points.length; i++) {
+    const distance = calculateDistance(
+      points[i - 1].latitude,
+      points[i - 1].longitude,
+      points[i].latitude,
+      points[i].longitude
+    );
+    totalDistance += distance;
+  }
+  
+  return totalDistance;
+}
+
+// Calculate elevation gain from GPS points
+function calculateElevationGain(points: LocationPoint[]): {
+  gain: number;
+  min: number;
+  max: number;
+  current: number;
+} {
+  if (points.length === 0) {
+    return { gain: 0, min: 0, max: 0, current: 0 };
+  }
+  
+  let gain = 0;
+  let minElevation = points[0].altitude || 0;
+  let maxElevation = points[0].altitude || 0;
+  const currentElevation = points[points.length - 1].altitude || 0;
+  
+  for (let i = 1; i < points.length; i++) {
+    const prevElevation = points[i - 1].altitude || 0;
+    const currentElevation = points[i].altitude || 0;
+    
+    // Only count upward movement as elevation gain
+    if (currentElevation > prevElevation) {
+      gain += currentElevation - prevElevation;
+    }
+    
+    minElevation = Math.min(minElevation, currentElevation);
+    maxElevation = Math.max(maxElevation, currentElevation);
+  }
+  
+  return {
+    gain: Math.max(0, gain),
+    min: minElevation,
+    max: maxElevation,
+    current: currentElevation
+  };
+}
+
 interface RunState {
   status: RunStatus;
   distanceMeters: number;
@@ -12,6 +91,8 @@ interface RunState {
   minElevationM: number;
   maxElevationM: number;
   elevationPoints: { timestamp: number; elevation: number; distance: number }[];
+  gpsPoints: LocationPoint[]; // Store GPS points for real calculations
+  startTime: number | null; // Track actual start time
   photos: { uri: string; timestamp: number }[];
   history: {
     id: string;
@@ -29,6 +110,8 @@ interface RunState {
   resume: () => void;
   stop: () => void;
   tick: (deltaSec: number, deltaMeters?: number) => void;
+  addGPSPoint: (point: LocationPoint) => void; // Add GPS point and recalculate
+  updateFromGPS: () => void; // Recalculate all metrics from GPS data
   addPhoto: (uri: string) => void;
   saveRunToHistory: () => { id: string } | null;
   reset: () => void;
@@ -48,80 +131,121 @@ export const useRunStore = create<RunState>((set, get) => ({
   distanceMeters: 0,
   durationSec: 0,
   paceStr: '–',
-  currentElevationM: 100, // Starting elevation
+  currentElevationM: 0,
   totalElevationGainM: 0,
-  minElevationM: 100,
-  maxElevationM: 100,
+  minElevationM: 0,
+  maxElevationM: 0,
   elevationPoints: [],
+  gpsPoints: [],
+  startTime: null,
   photos: [],
   history: [],
   start: () => {
-    const startElevation = 100 + Math.random() * 100; // Random starting elevation between 100-200m
+    const now = Date.now();
     set({ 
       status: 'running', 
       distanceMeters: 0, 
       durationSec: 0, 
       paceStr: '–', 
       photos: [],
-      currentElevationM: startElevation,
+      currentElevationM: 0,
       totalElevationGainM: 0,
-      minElevationM: startElevation,
-      maxElevationM: startElevation,
-      elevationPoints: [{ timestamp: Date.now(), elevation: startElevation, distance: 0 }]
+      minElevationM: 0,
+      maxElevationM: 0,
+      elevationPoints: [],
+      gpsPoints: [], // Will be populated by GPS tracking
+      startTime: now
     });
   },
   pause: () => set({ status: 'paused' }),
   resume: () => set({ status: 'running' }),
   stop: () => set({ status: 'finished' }),
+  // Update duration based on real time (called by timer)
   tick: (deltaSec, deltaMeters = 0) => {
-    const { 
-      status, 
-      durationSec, 
-      distanceMeters, 
-      currentElevationM, 
-      totalElevationGainM, 
-      minElevationM, 
-      maxElevationM, 
-      elevationPoints 
-    } = get();
+    const { status, startTime } = get();
+    if (status !== 'running' || !startTime) return;
+    
+    // Calculate actual duration from start time
+    const actualDuration = Math.floor((Date.now() - startTime) / 1000);
+    
+    // Update GPS-based metrics
+    get().updateFromGPS();
+    
+    set({ durationSec: actualDuration });
+  },
+  
+  // Add a GPS point and recalculate all metrics
+  addGPSPoint: (point: LocationPoint) => {
+    const { gpsPoints, status } = get();
     if (status !== 'running') return;
     
-    const newDuration = durationSec + deltaSec;
-    const newDistance = distanceMeters + deltaMeters;
+    const newGpsPoints = [...gpsPoints, point];
+    set({ gpsPoints: newGpsPoints });
     
-    // Simulate elevation changes (realistic trail running elevation variation)
-    const elevationChange = (Math.random() - 0.5) * 4; // +/- 2m per second variation
-    const newElevation = Math.max(0, currentElevationM + elevationChange);
+    // Recalculate all metrics from GPS data
+    get().updateFromGPS();
+  },
+  
+  // Recalculate all running metrics from GPS points
+  updateFromGPS: () => {
+    const { gpsPoints, startTime } = get();
     
-    // Calculate elevation gain (only count upward movement)
-    let newElevationGain = totalElevationGainM;
-    if (elevationChange > 0) {
-      newElevationGain += elevationChange;
+    if (gpsPoints.length === 0) {
+      return;
     }
     
-    // Update min/max elevations
-    const newMinElevation = Math.min(minElevationM, newElevation);
-    const newMaxElevation = Math.max(maxElevationM, newElevation);
+    // Calculate distance from GPS points
+    const totalDistance = calculateTotalDistance(gpsPoints);
     
-    // Add new elevation point every 10 seconds
-    const newElevationPoints = [...elevationPoints];
-    if (newDuration % 10 === 0) {
-      newElevationPoints.push({
-        timestamp: Date.now(),
-        elevation: newElevation,
-        distance: newDistance
-      });
+    // Calculate elevation data
+    const elevationData = calculateElevationGain(gpsPoints);
+    
+    // Calculate duration from start time
+    const actualDuration = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
+    
+    // Calculate pace
+    const paceStr = secToPaceStr(actualDuration, totalDistance);
+    
+    // Update elevation points for the chart (sample every ~100 meters or significant elevation change)
+    const elevationPoints: { timestamp: number; elevation: number; distance: number }[] = [];
+    let lastElevationPoint = 0;
+    let cumulativeDistance = 0;
+    
+    for (let i = 0; i < gpsPoints.length; i++) {
+      if (i > 0) {
+        cumulativeDistance += calculateDistance(
+          gpsPoints[i - 1].latitude,
+          gpsPoints[i - 1].longitude,
+          gpsPoints[i].latitude,
+          gpsPoints[i].longitude
+        );
+      }
+      
+      // Add point if it's the first, every ~100m, or if there's significant elevation change
+      const elevationChange = Math.abs((gpsPoints[i].altitude || 0) - lastElevationPoint);
+      if (
+        i === 0 || 
+        i === gpsPoints.length - 1 || 
+        cumulativeDistance - (elevationPoints[elevationPoints.length - 1]?.distance || 0) >= 100 ||
+        elevationChange >= 10
+      ) {
+        elevationPoints.push({
+          timestamp: gpsPoints[i].timestamp,
+          elevation: gpsPoints[i].altitude || 0,
+          distance: cumulativeDistance
+        });
+        lastElevationPoint = gpsPoints[i].altitude || 0;
+      }
     }
     
-    set({ 
-      durationSec: newDuration, 
-      distanceMeters: newDistance, 
-      paceStr: secToPaceStr(newDuration, newDistance),
-      currentElevationM: newElevation,
-      totalElevationGainM: newElevationGain,
-      minElevationM: newMinElevation,
-      maxElevationM: newMaxElevation,
-      elevationPoints: newElevationPoints
+    set({
+      distanceMeters: totalDistance,
+      paceStr,
+      currentElevationM: elevationData.current,
+      totalElevationGainM: elevationData.gain,
+      minElevationM: elevationData.min,
+      maxElevationM: elevationData.max,
+      elevationPoints
     });
   },
   addPhoto: (uri) => set((state) => ({ photos: [...state.photos, { uri, timestamp: Date.now() }] })),
@@ -159,11 +283,13 @@ export const useRunStore = create<RunState>((set, get) => ({
     durationSec: 0, 
     paceStr: '–', 
     photos: [],
-    currentElevationM: 100,
+    currentElevationM: 0,
     totalElevationGainM: 0,
-    minElevationM: 100,
-    maxElevationM: 100,
-    elevationPoints: []
+    minElevationM: 0,
+    maxElevationM: 0,
+    elevationPoints: [],
+    gpsPoints: [],
+    startTime: null
   }),
   // Demo method for testing - can be removed later
   addDemoData: () => {

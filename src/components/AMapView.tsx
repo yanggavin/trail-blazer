@@ -16,7 +16,7 @@ interface AMapViewProps {
   currentLocation?: LocationPoint;
   showUserLocation?: boolean;
   onRegionChange?: (region: any) => void;
-  onPress?: (coordinate: { latitude: number; longitude: number }) => void;
+  onPress?: (event: { nativeEvent: { latitude: number; longitude: number } }) => void;
 }
 
 const AMapView: React.FC<AMapViewProps> = ({
@@ -40,6 +40,15 @@ const AMapView: React.FC<AMapViewProps> = ({
   };
 
   const region = initialRegion || defaultRegion;
+  
+  // Convert to AMap CameraPosition format
+  const cameraPosition = {
+    target: {
+      latitude: region.latitude,
+      longitude: region.longitude,
+    },
+    zoom: 15,
+  };
 
   useEffect(() => {
     if (mapReady && currentLocation && mapRef.current) {
@@ -66,62 +75,51 @@ const AMapView: React.FC<AMapViewProps> = ({
       <MapView
         ref={mapRef}
         style={styles.map}
-        initialRegion={region}
-        showsUserLocation={showUserLocation}
-        showsMyLocationButton={false}
-        showsCompass={true}
-        showsScale={true}
+        initialCameraPosition={cameraPosition}
+        myLocationEnabled={showUserLocation}
+        compassEnabled={true}
+        scaleControlsEnabled={true}
         zoomControlsEnabled={false}
-        onMapReady={handleMapReady}
-        onRegionChange={onRegionChange}
+        onLoad={handleMapReady}
+        onCameraIdle={onRegionChange}
         onPress={onPress}
       >
         {/* Trail path polyline */}
         {polylineCoordinates.length > 1 && (
           <Polyline
-            coordinates={polylineCoordinates}
-            strokeColor={colors.primary}
-            strokeWidth={4}
-            lineJoin="round"
-            lineCap="round"
+            points={polylineCoordinates}
+            color={colors.primary}
+            width={4}
           />
         )}
 
         {/* Current location marker */}
         {currentLocation && (
           <Marker
-            coordinate={{
+            position={{
               latitude: currentLocation.latitude,
               longitude: currentLocation.longitude,
             }}
-            title="Current Location"
-            pinColor={colors.primary}
           />
         )}
 
         {/* Start point marker */}
         {trailPath.length > 0 && (
           <Marker
-            coordinate={{
+            position={{
               latitude: trailPath[0].latitude,
               longitude: trailPath[0].longitude,
             }}
-            title="Start"
-            description="Trail start point"
-            pinColor="#4CAF50" // Green for start
           />
         )}
 
         {/* End point marker */}
         {trailPath.length > 1 && (
           <Marker
-            coordinate={{
+            position={{
               latitude: trailPath[trailPath.length - 1].latitude,
               longitude: trailPath[trailPath.length - 1].longitude,
             }}
-            title="Finish"
-            description="Trail end point"
-            pinColor="#F44336" // Red for finish
           />
         )}
       </MapView>

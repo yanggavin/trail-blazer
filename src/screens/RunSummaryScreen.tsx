@@ -42,10 +42,10 @@ export default function RunSummaryScreen() {
     if (saved) {
       reset();
       // Navigate to SavedConfirmation with run data
-      navigation.replace('SavedConfirmation' as never, { 
+      (navigation as any).replace('SavedConfirmation', { 
         distance: distanceMeters, 
         durationSec 
-      } as never);
+      });
     }
   };
 
@@ -174,7 +174,7 @@ export default function RunSummaryScreen() {
                     imageStyle={styles.photoCardImageStyle}
                   />
                   <Text style={styles.photoCardTitle}>
-                    {photo.title || `Photo ${idx + 1}`}
+                    {'title' in photo ? photo.title : `Photo ${idx + 1}`}
                   </Text>
                 </View>
               ))}

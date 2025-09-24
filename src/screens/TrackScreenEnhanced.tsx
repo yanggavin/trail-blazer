@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, SafeAreaView, StatusBar, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRunStore } from '../store/runStore';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { colors } from '../theme/colors';
 import MapView, { Polyline, Marker, Region } from 'react-native-maps';
 import { getAMapConfig, validateAMapConfig, debugConfig } from '../config/amapConfig';
@@ -30,6 +30,7 @@ export default function TrackScreenEnhanced() {
     resume, 
     stop, 
     addPhoto, 
+    addGPSPoint,
     tick 
   } = useRunStore();
   
@@ -37,6 +38,7 @@ export default function TrackScreenEnhanced() {
   const [trailPath, setTrailPath] = useState<LocationPoint[]>([]);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [mapRegion, setMapRegion] = useState<Region | null>(null);
+  const [isPausePressed, setIsPausePressed] = useState(false);
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
@@ -71,10 +73,21 @@ export default function TrackScreenEnhanced() {
     requestLocationPermission();
   }, []);
 
+  // Get current location whenever the Track tab is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('📱 Track tab focused - updating location');
+      if (hasLocationPermission && status === 'idle') {
+        getCurrentLocationForTab();
+      }
+    }, [hasLocationPermission, status])
+  );
+
   useEffect(() => {
     if (status === 'running') {
       startLocationTracking();
-      intervalRef.current = setInterval(() => tick(1, 1.6), 1000);
+      // Timer now only updates duration - distance comes from GPS
+      intervalRef.current = setInterval(() => tick(1), 1000);
     } else if (status === 'paused') {
       stopLocationTracking();
       if (intervalRef.current) {
@@ -105,26 +118,8 @@ export default function TrackScreenEnhanced() {
       setHasLocationPermission(hasPermission);
       
       if (hasPermission) {
-        // Get initial location
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.BestForNavigation,
-        });
-        
-        const locationPoint: LocationPoint = {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          altitude: location.coords.altitude || undefined,
-          accuracy: location.coords.accuracy || undefined,
-          timestamp: location.timestamp,
-        };
-        
-        setCurrentLocation(locationPoint);
-        setMapRegion({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        });
+        // Get initial location immediately after permission is granted
+        await getCurrentLocationForTab();
       } else {
         Alert.alert(
           'Location Permission Required', 
@@ -137,15 +132,65 @@ export default function TrackScreenEnhanced() {
     }
   };
 
+  const getCurrentLocationForTab = async () => {
+    try {
+      console.log('🎯 Getting current location for Track tab...');
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.BestForNavigation,
+        maximumAge: 5000, // Accept location up to 5 seconds old
+        timeout: 8000, // Wait up to 8 seconds
+      });
+      
+      const locationPoint: LocationPoint = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        altitude: location.coords.altitude || undefined,
+        accuracy: location.coords.accuracy || undefined,
+        timestamp: location.timestamp,
+      };
+      
+      console.log('📍 Current location updated:', {
+        lat: locationPoint.latitude.toFixed(6),
+        lng: locationPoint.longitude.toFixed(6)
+      });
+      
+      setCurrentLocation(locationPoint);
+      setMapRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+      
+      // Center map on current location
+      if (mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Failed to get current location:', error);
+    }
+  };
+
   const startLocationTracking = async () => {
-    if (!hasLocationPermission) return;
+    console.log('📍 Starting location tracking...');
+    if (!hasLocationPermission) {
+      console.log('⚠️ Cannot start location tracking: permission not granted');
+      return;
+    }
     
     try {
+      console.log('👋 Setting up location watch...');
       locationSubscription.current = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.BestForNavigation,
-          timeInterval: 1000, // Update every second
-          distanceInterval: 1, // Update every meter
+          timeInterval: 2000, // Update every 2 seconds (less frequent but more reliable)
+          distanceInterval: 3, // Update every 3 meters (reduce noise)
+          mayShowUserSettingsDialog: true,
         },
         (location) => {
           const locationPoint: LocationPoint = {
@@ -156,8 +201,48 @@ export default function TrackScreenEnhanced() {
             timestamp: location.timestamp,
           };
 
+          console.log('📍 New location point:', {
+            lat: locationPoint.latitude.toFixed(6),
+            lng: locationPoint.longitude.toFixed(6),
+            accuracy: locationPoint.accuracy,
+            altitude: locationPoint.altitude
+          });
+
           setCurrentLocation(locationPoint);
-          setTrailPath(prev => [...prev, locationPoint]);
+          
+          // Add GPS point to store for real calculations
+          if (status === 'running') {
+            addGPSPoint(locationPoint);
+            console.log('📍 GPS point added to store for distance calculation');
+          }
+          
+          // Update trail path for map display
+          setTrailPath(prev => {
+            // Only add point if it's significantly different from the last point
+            // to avoid duplicates and noise in map display
+            if (prev.length === 0) {
+              const newPath = [locationPoint];
+              console.log('🛴️ First trail point added for map display, total points:', newPath.length);
+              return newPath;
+            }
+            
+            const lastPoint = prev[prev.length - 1];
+            const distance = Math.sqrt(
+              Math.pow(locationPoint.latitude - lastPoint.latitude, 2) +
+              Math.pow(locationPoint.longitude - lastPoint.longitude, 2)
+            );
+            
+            // Only add point if it's more than ~2 meters away (rough approximation)
+            // 1 degree ≈ 111km, so 0.00002 degrees ≈ 2.2 meters
+            if (distance > 0.00002) {
+              const newPath = [...prev, locationPoint];
+              console.log('🛴️ Trail path updated for map display, total points:', newPath.length);
+              return newPath;
+            } else {
+              console.log('📍 Location too close to last point for map, skipping display update');
+              return prev;
+            }
+          });
           
           // Update map region to follow user
           const newRegion = {
@@ -174,8 +259,9 @@ export default function TrackScreenEnhanced() {
           }
         }
       );
+      console.log('✅ Location tracking setup successful');
     } catch (error) {
-      console.error('Location tracking error:', error);
+      console.error('❌ Location tracking error:', error);
       Alert.alert('Error', 'Failed to start location tracking');
     }
   };
@@ -198,18 +284,55 @@ export default function TrackScreenEnhanced() {
   };
 
   const handleStart = async () => {
+    console.log('🏃 Starting run...');
     if (!hasLocationPermission) {
+      console.log('📍 Requesting location permission...');
       await requestLocationPermission();
-      if (!hasLocationPermission) return;
+      if (!hasLocationPermission) {
+        console.log('❌ Location permission denied');
+        return;
+      }
     }
     
-    setTrailPath([]);
+    // Use current location as starting point if available, otherwise start with empty trail
+    if (currentLocation) {
+      console.log('🎯 Using current location as starting point:', {
+        lat: currentLocation.latitude.toFixed(6),
+        lng: currentLocation.longitude.toFixed(6)
+      });
+      setTrailPath([currentLocation]);
+    } else {
+      console.log('⚠️ No current location available, starting with empty trail');
+      setTrailPath([]);
+    }
+    
+    // Start the run immediately - location tracking will begin
     start();
+    console.log('✅ Run started successfully');
   };
 
   const handleStop = () => {
-    stop();
+    Alert.alert(
+      'Stop Run?',
+      'Are you sure you want to stop your run? This will end your current session.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Stop Run',
+          style: 'destructive',
+          onPress: () => {
+            console.log('🛑 Stopping run confirmed by user');
+            stop();
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
+
 
   // Format functions
   const fmtDistance = (m: number) => `${(m / 1000).toFixed(1)} km`;
@@ -286,8 +409,9 @@ export default function TrackScreenEnhanced() {
                     longitude: trailPath[0].longitude,
                   }}
                   title="Start"
-                  description="Trail start point"
+                  description={`Trail start: ${new Date(trailPath[0].timestamp).toLocaleTimeString()}`}
                   pinColor="#4CAF50"
+                  identifier="start-marker"
                 />
               )}
 
@@ -342,23 +466,35 @@ export default function TrackScreenEnhanced() {
               >
                 <Ionicons name="locate" size={20} color="#111" />
               </TouchableOpacity>
-              {__DEV__ && !currentLocation && (
+              {__DEV__ && (
                 <TouchableOpacity 
                   style={styles.mapControlButton}
                   onPress={() => {
-                    // Simulate location for testing
+                    // Simulate location for testing (works on real device too)
+                    const baseLocation = currentLocation || {
+                      latitude: 37.7749,
+                      longitude: -122.4194
+                    };
                     const simulatedLocation = {
-                      latitude: 37.7749 + (Math.random() - 0.5) * 0.01,
-                      longitude: -122.4194 + (Math.random() - 0.5) * 0.01,
+                      latitude: baseLocation.latitude + (Math.random() - 0.5) * 0.001,
+                      longitude: baseLocation.longitude + (Math.random() - 0.5) * 0.001,
                       altitude: 100 + Math.random() * 50,
                       accuracy: 5,
                       timestamp: Date.now(),
                     };
                     setCurrentLocation(simulatedLocation);
-                    console.log('🧪 Simulated location:', simulatedLocation);
+                    if (status === 'running') {
+                      addGPSPoint(simulatedLocation);
+                      setTrailPath(prev => {
+                        const newPath = [...prev, simulatedLocation];
+                        console.log('🧪 Manually added location to trail for map display, total points:', newPath.length);
+                        return newPath;
+                      });
+                    }
+                    console.log('🧪 Test location:', simulatedLocation);
                   }}
                 >
-                  <Ionicons name="location" size={20} color="#111" />
+                  <Ionicons name="add-circle" size={20} color="#111" />
                 </TouchableOpacity>
               )}
             </View>
@@ -412,18 +548,40 @@ export default function TrackScreenEnhanced() {
               {/* Control Buttons Row */}
               <View style={styles.controlButtonsRow}>
                 <TouchableOpacity style={styles.stopButton} onPress={handleStop}>
+                  <Ionicons name="stop" size={18} color="white" style={{ marginRight: 4 }} />
                   <Text style={styles.stopButtonText}>Stop Run</Text>
                 </TouchableOpacity>
                 
                 {status === 'running' ? (
-                  <TouchableOpacity onPress={() => pause()} style={styles.pauseButton}>
-                    <Ionicons name="pause" size={24} color={colors.backgroundDark} />
-                  </TouchableOpacity>
+                  <Pressable
+                    style={[styles.pauseButton, isPausePressed && styles.pauseButtonPressed]}
+                    onPressIn={() => setIsPausePressed(true)}
+                    onPressOut={() => setIsPausePressed(false)}
+                    onLongPress={() => {
+                      console.log('⏸️ Long press pause detected');
+                      pause();
+                      setIsPausePressed(false);
+                    }}
+                    delayLongPress={800} // 800ms long press
+                  >
+                    <Ionicons 
+                      name="pause" 
+                      size={24} 
+                      color={isPausePressed ? colors.primary : colors.backgroundDark} 
+                    />
+                  </Pressable>
                 ) : (
                   <TouchableOpacity style={styles.resumeButton} onPress={() => resume()}>
                     <Ionicons name="play" size={24} color={colors.backgroundDark} />
                   </TouchableOpacity>
                 )}
+              </View>
+              
+              {/* Instructions for protected buttons */}
+              <View style={styles.buttonHints}>
+                <Text style={styles.hintText}>
+                  🔒 Tap Stop for confirmation • Hold Pause button
+                </Text>
               </View>
             </View>
           )}
@@ -607,6 +765,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#dc2626',
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    shadowColor: '#dc2626',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
   },
   stopButtonText: {
     color: 'white',
@@ -620,6 +787,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#eab308',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#eab308',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  pauseButtonPressed: {
+    backgroundColor: '#f59e0b', // Brighter yellow when pressed
+    transform: [{ scale: 0.95 }],
+  },
+  buttonHints: {
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  hintText: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
   resumeButton: {
     width: 48,
