@@ -11,7 +11,20 @@ const mapBg = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDp4iiXh2tvmRt
 
 export default function TrackScreen() {
   const navigation = useNavigation();
-  const { status, distanceMeters, durationSec, paceStr, start, pause, resume, stop, addPhoto, tick } = useRunStore();
+  const { 
+    status, 
+    distanceMeters, 
+    durationSec, 
+    paceStr, 
+    currentElevationM, 
+    totalElevationGainM, 
+    start, 
+    pause, 
+    resume, 
+    stop, 
+    addPhoto, 
+    tick 
+  } = useRunStore();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -57,6 +70,10 @@ export default function TrackScreen() {
     const secs = Math.floor((minutesPerKm - mins) * 60);
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} /km`;
   };
+  
+  // Format elevation
+  const fmtElevation = (m: number) => `${Math.round(m)} m`;
+  const fmtElevationGain = (m: number) => `+${Math.round(m)} m`;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -113,6 +130,14 @@ export default function TrackScreen() {
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>Duration</Text>
             <Text style={styles.statValue}>{fmtTime(durationSec)}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Elevation</Text>
+            <Text style={styles.statValue}>{fmtElevation(currentElevationM)}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Elev Gain</Text>
+            <Text style={styles.statValue}>{fmtElevationGain(totalElevationGainM)}</Text>
           </View>
           <View style={[styles.statCard, styles.statCardFullWidth]}>
             <Text style={styles.statLabel}>Pace</Text>
@@ -197,15 +222,15 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingBottom: 16,
   },
   mapContainer: {
     position: 'relative',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   map: {
     width: '100%',
-    aspectRatio: 16 / 10,
+    aspectRatio: 2 / 1,
   },
   mapImage: {
     borderRadius: 16,
@@ -243,13 +268,13 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 16,
-    marginBottom: 24,
+    gap: 12,
+    marginBottom: 16,
   },
   statCard: {
     backgroundColor: 'rgba(17, 33, 17, 0.05)',
-    padding: 16,
-    borderRadius: 16,
+    padding: 12,
+    borderRadius: 12,
     flex: 1,
     minWidth: '45%',
   },
@@ -264,18 +289,18 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   statValue: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#111',
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
   },
   startButton: {
     flex: 1,
-    height: 56,
-    borderRadius: 28,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -286,24 +311,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   cameraButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: `${colors.primary}33`, // 20% opacity
     alignItems: 'center',
     justifyContent: 'center',
   },
   runningActions: {
     flex: 1,
-    gap: 16,
+    gap: 12,
   },
   takePhotoButton: {
     width: '100%',
-    height: 56,
+    height: 48,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 28,
+    borderRadius: 24,
     backgroundColor: `${colors.primary}33`, // 20% opacity
     gap: 8,
   },
@@ -314,12 +339,12 @@ const styles = StyleSheet.create({
   },
   controlButtonsRow: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
   },
   stopButton: {
     flex: 1,
-    height: 56,
-    borderRadius: 28,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: '#dc2626', // red-600
     alignItems: 'center',
     justifyContent: 'center',
@@ -330,17 +355,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   pauseButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: '#eab308', // yellow-500
     alignItems: 'center',
     justifyContent: 'center',
   },
   resumeButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',

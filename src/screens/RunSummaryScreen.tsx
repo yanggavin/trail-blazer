@@ -9,7 +9,15 @@ const mapBg = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCI0Z0BwtDJ-aa
 
 export default function RunSummaryScreen() {
   const navigation = useNavigation();
-  const { distanceMeters, durationSec, photos, saveRunToHistory, reset } = useRunStore();
+  const { 
+    distanceMeters, 
+    durationSec, 
+    photos, 
+    totalElevationGainM, 
+    maxElevationM, 
+    saveRunToHistory, 
+    reset 
+  } = useRunStore();
 
   const fmtDistance = (m: number) => `${(m / 1000).toFixed(2)} km`;
   const fmtTime = (s: number) => {
@@ -25,6 +33,9 @@ export default function RunSummaryScreen() {
     const secs = Math.floor(paceSecPerKm % 60);
     return `${mins.toString()}:${secs.toString().padStart(2, '0')} /km`;
   };
+  
+  const fmtElevation = (m: number) => `${Math.round(m)} m`;
+  const fmtElevationGain = (m: number) => `+${Math.round(m)} m`;
 
   const onSave = () => {
     const saved = saveRunToHistory();
@@ -133,6 +144,18 @@ export default function RunSummaryScreen() {
                 <Text style={styles.statUnit}>/km</Text>
               </Text>
             </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statLabel}>Elev Gain</Text>
+              <Text style={styles.statValue}>
+                {fmtElevationGain(totalElevationGainM)}
+              </Text>
+            </View>
+            <View style={[styles.statCard, styles.statCardSingle]}>
+              <Text style={styles.statLabel}>Max Elevation</Text>
+              <Text style={styles.statValue}>
+                {fmtElevation(maxElevationM)}
+              </Text>
+            </View>
           </View>
 
           {/* Photos Section */}
@@ -210,14 +233,15 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 16,
-    gap: 24,
+    gap: 16,
+    paddingBottom: 16,
   },
   mapContainer: {
     position: 'relative',
   },
   mapImage: {
     width: '100%',
-    aspectRatio: 16 / 9,
+    aspectRatio: 2 / 1,
   },
   mapImageStyle: {
     borderRadius: 16,
@@ -249,32 +273,40 @@ const styles = StyleSheet.create({
   },
   statsGrid: {
     flexDirection: 'row',
-    gap: 12,
+    flexWrap: 'wrap',
+    gap: 8,
+    justifyContent: 'space-between',
   },
   statCard: {
-    flex: 1,
+    width: '48%',
     backgroundColor: `${colors.primary}33`, // 20% opacity
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 12,
+    padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 2,
+    marginBottom: 6,
+  },
+  statCardSingle: {
+    width: '100%',
+    marginTop: 2,
   },
   statLabel: {
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.8)',
   },
   statValue: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+    textAlign: 'center',
   },
   statUnit: {
     fontSize: 16,
     fontWeight: 'normal',
   },
   photosSection: {
-    gap: 12,
+    gap: 8,
   },
   sectionTitle: {
     fontSize: 18,
@@ -282,12 +314,12 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   photosScroll: {
-    gap: 12,
-    paddingVertical: 8,
+    gap: 8,
+    paddingVertical: 4,
   },
   photoCard: {
-    width: 160,
-    gap: 8,
+    width: 140,
+    gap: 6,
   },
   photoCardImage: {
     width: '100%',
@@ -303,14 +335,16 @@ const styles = StyleSheet.create({
   },
   footer: {
     backgroundColor: 'rgba(246, 248, 246, 0.1)',
-    paddingTop: 16,
+    paddingTop: 12,
     paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   actionButtons: {
     flexDirection: 'row',
     gap: 12,
     paddingHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   discardButton: {
     flex: 1,

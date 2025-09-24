@@ -5,7 +5,9 @@
     "version": "0.1.0",
     "scheme": "trailblazer",
     "orientation": "portrait",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gavinyang.trailblazer",
@@ -18,6 +20,11 @@
       }
     },
     "android": {},
-    "web": { "bundler": "metro" }
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
