@@ -36,8 +36,8 @@ export default function TrackScreen() {
     if (!result.canceled) addPhoto(result.assets[0].uri);
   };
 
-  // Convert meters to miles for display
-  const fmtDistance = (m: number) => `${(m * 0.000621371).toFixed(1)} mi`;
+  // Convert meters to kilometers for display
+  const fmtDistance = (m: number) => `${(m / 1000).toFixed(1)} km`;
   const fmtTime = (s: number) => {
     const hours = Math.floor(s / 3600);
     const mins = Math.floor((s % 3600) / 60);
@@ -45,15 +45,15 @@ export default function TrackScreen() {
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
   
-  // Format pace in minutes per mile
+  // Format pace in minutes per kilometer
   const fmtPace = () => {
-    if (distanceMeters === 0) return '00:00 /mi';
-    const milesPerHour = (distanceMeters * 0.000621371) / (durationSec / 3600);
-    if (milesPerHour === 0) return '00:00 /mi';
-    const minutesPerMile = 60 / milesPerHour;
-    const mins = Math.floor(minutesPerMile);
-    const secs = Math.floor((minutesPerMile - mins) * 60);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} /mi`;
+    if (distanceMeters === 0) return '00:00 /km';
+    const kmPerHour = (distanceMeters / 1000) / (durationSec / 3600);
+    if (kmPerHour === 0) return '00:00 /km';
+    const minutesPerKm = 60 / kmPerHour;
+    const mins = Math.floor(minutesPerKm);
+    const secs = Math.floor((minutesPerKm - mins) * 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} /km`;
   };
 
   return (
