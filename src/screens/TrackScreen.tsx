@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, Alert, SafeAreaView, StatusBar } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRunStore } from '../store/runStore';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
+import { colors } from '../theme/colors';
 
 const mapBg = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDp4iiXh2tvmRtnR8xGsniRkD6TpOd1S2qpvRZcq1hrNUPH1LHkqM5qRzcpo8HcTb76FMhfWA1_4xluRgRT4uEecS12e_1sWZHQJ52iVq-8aMoqrkiwtyQUt-n2_egxM9ZgcWM3b_P5Dh1nl_MYHLPt2YpzBw_rboqK-rP9hYRmTYVuA8epglJQWLbtfPx8-prvc-7WBKbe0M398XHgjPwnAxNIxZpTU3eOhnLA3KMk8Fw_JkdFlBjoC80lpUOHRRyycFZytnBbXJo';
 
@@ -34,58 +36,192 @@ export default function TrackScreen() {
     if (!result.canceled) addPhoto(result.assets[0].uri);
   };
 
-  const fmtDistance = (m: number) => `${(m/1000).toFixed(2)} km`;
-  const fmtTime = (s: number) => new Date(s * 1000).toISOString().substring(11,19);
+  // Convert meters to miles for display
+  const fmtDistance = (m: number) => `${(m * 0.000621371).toFixed(1)} mi`;
+  const fmtTime = (s: number) => {
+    const hours = Math.floor(s / 3600);
+    const mins = Math.floor((s % 3600) / 60);
+    const secs = s % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Format pace in minutes per mile
+  const fmtPace = () => {
+    if (distanceMeters === 0) return '00:00 /mi';
+    const milesPerHour = (distanceMeters * 0.000621371) / (durationSec / 3600);
+    if (milesPerHour === 0) return '00:00 /mi';
+    const minutesPerMile = 60 / milesPerHour;
+    const mins = Math.floor(minutesPerMile);
+    const secs = Math.floor((minutesPerMile - mins) * 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} /mi`;
+  };
 
   return (
-    <View style={styles.container}>
-      <ImageBackground source={{ uri: mapBg }} style={styles.map} />
-      <View style={styles.statsRow}>
-        <View style={styles.stat}><Text style={styles.label}>Distance</Text><Text style={styles.value}>{fmtDistance(distanceMeters)}</Text></View>
-        <View style={styles.stat}><Text style={styles.label}>Duration</Text><Text style={styles.value}>{fmtTime(durationSec)}</Text></View>
-        <View style={[styles.stat, { flex: 1 }]}><Text style={styles.label}>Pace</Text><Text style={styles.value}>{paceStr}</Text></View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.backgroundLight} />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerSpacer} />
+        <Text style={styles.headerTitle}>Trail Tracker</Text>
+        <TouchableOpacity style={styles.settingsButton}>
+          <Ionicons name="settings-outline" size={24} color="#666" />
+        </TouchableOpacity>
       </View>
-      <View style={styles.actions}>
-        {status === 'idle' && (
-          <TouchableOpacity style={styles.primary} onPress={start}><Text style={styles.primaryText}>Start Run</Text></TouchableOpacity>
-        )}
-        {status === 'running' && (
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <TouchableOpacity onPress={onTakePhoto} style={[styles.circle, { backgroundColor: 'rgba(23,207,23,0.2)' }]}>
-              <Text style={{ color: '#17cf17', fontWeight: '800' }}>📷</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => stop()} style={[styles.primary, { backgroundColor: '#e02424' }]}>
-              <Text style={[styles.primaryText, { color: 'white' }]}>Stop Run</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => pause()} style={[styles.circle, { backgroundColor: '#facc15' }]}>
-              <Text style={{ color: '#112111', fontWeight: '800' }}>II</Text>
-            </TouchableOpacity>
+
+      {/* Main Content */}
+      <View style={styles.main}>
+        {/* Map */}
+        <ImageBackground source={{ uri: mapBg }} style={styles.map} imageStyle={styles.mapImage} />
+        
+        {/* Stats Grid */}
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Distance</Text>
+            <Text style={styles.statValue}>{fmtDistance(distanceMeters)}</Text>
           </View>
-        )}
-        {status === 'paused' && (
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <TouchableOpacity onPress={() => resume()} style={styles.primary}>
-              <Text style={styles.primaryText}>Resume</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => stop()} style={[styles.primary, { backgroundColor: '#e02424' }]}>
-              <Text style={[styles.primaryText, { color: 'white' }]}>Stop</Text>
-            </TouchableOpacity>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Duration</Text>
+            <Text style={styles.statValue}>{fmtTime(durationSec)}</Text>
           </View>
-        )}
+          <View style={[styles.statCard, styles.statCardFullWidth]}>
+            <Text style={styles.statLabel}>Pace</Text>
+            <Text style={styles.statValue}>{fmtPace()}</Text>
+          </View>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.actionButtons}>
+          {status === 'idle' && (
+            <>
+              <TouchableOpacity style={styles.startButton} onPress={start}>
+                <Text style={styles.startButtonText}>Start Run</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onTakePhoto} style={styles.cameraButton}>
+                <Ionicons name="camera" size={28} color={colors.primary} />
+              </TouchableOpacity>
+            </>
+          )}
+          {status === 'running' && (
+            <>
+              <TouchableOpacity style={[styles.startButton, { backgroundColor: '#e02424' }]} onPress={() => stop()}>
+                <Text style={[styles.startButtonText, { color: 'white' }]}>Stop Run</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onTakePhoto} style={styles.cameraButton}>
+                <Ionicons name="camera" size={28} color={colors.primary} />
+              </TouchableOpacity>
+            </>
+          )}
+          {status === 'paused' && (
+            <>
+              <TouchableOpacity style={styles.startButton} onPress={() => resume()}>
+                <Text style={styles.startButtonText}>Resume</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.startButton, { backgroundColor: '#e02424', flex: 0.5 }]} onPress={() => stop()}>
+                <Text style={[styles.startButtonText, { color: 'white' }]}>Stop</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f6f8f6' },
-  map: { width: '100%', aspectRatio: 16/10 },
-  statsRow: { flexDirection: 'row', gap: 12, padding: 16 },
-  stat: { backgroundColor: 'rgba(0,0,0,0.04)', padding: 12, borderRadius: 12 },
-  label: { fontSize: 12, color: '#666' },
-  value: { fontSize: 20, fontWeight: '800', color: '#111' },
-  actions: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
-  primary: { flex: 1, height: 56, borderRadius: 28, backgroundColor: '#17cf17', alignItems: 'center', justifyContent: 'center' },
-  primaryText: { color: '#112111', fontSize: 18, fontWeight: '800' },
-  circle: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
+  container: {
+    flex: 1,
+    backgroundColor: colors.backgroundLight,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: colors.backgroundLight,
+  },
+  headerSpacer: {
+    width: 48,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#111',
+    textAlign: 'center',
+    flex: 1,
+  },
+  settingsButton: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 24,
+  },
+  main: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+  },
+  map: {
+    width: '100%',
+    aspectRatio: 16 / 10,
+    marginBottom: 24,
+  },
+  mapImage: {
+    borderRadius: 16,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    marginBottom: 24,
+  },
+  statCard: {
+    backgroundColor: 'rgba(17, 33, 17, 0.05)',
+    padding: 16,
+    borderRadius: 16,
+    flex: 1,
+    minWidth: '45%',
+  },
+  statCardFullWidth: {
+    flexBasis: '100%',
+    minWidth: '100%',
+  },
+  statLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#111',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  startButton: {
+    flex: 1,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  startButtonText: {
+    color: colors.backgroundDark,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cameraButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: `${colors.primary}33`, // 20% opacity
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
