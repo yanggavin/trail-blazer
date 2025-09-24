@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, Alert, SafeAreaView, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Svg, Path } from 'react-native-svg';
 import { useRunStore } from '../store/runStore';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
@@ -72,7 +73,35 @@ export default function TrackScreen() {
       {/* Main Content */}
       <View style={styles.main}>
         {/* Map */}
-        <ImageBackground source={{ uri: mapBg }} style={styles.map} imageStyle={styles.mapImage} />
+        <View style={styles.mapContainer}>
+          <ImageBackground source={{ uri: mapBg }} style={styles.map} imageStyle={styles.mapImage}>
+            {/* Trail Path Overlay */}
+            {status !== 'idle' && (
+              <Svg style={styles.trailOverlay} viewBox="0 0 375 234">
+                <Path
+                  d="M 50 150 Q 80 180, 120 160 T 200 120 Q 250 100, 280 140 T 320 180"
+                  fill="none"
+                  stroke="rgba(23, 207, 23, 0.8)"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="5"
+                />
+              </Svg>
+            )}
+            
+            {/* Map Controls */}
+            {status !== 'idle' && (
+              <View style={styles.mapControls}>
+                <TouchableOpacity style={styles.mapControlButton}>
+                  <Ionicons name="add" size={24} color="#111" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.mapControlButton}>
+                  <Ionicons name="remove" size={24} color="#111" />
+                </TouchableOpacity>
+              </View>
+            )}
+          </ImageBackground>
+        </View>
         
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
@@ -102,25 +131,31 @@ export default function TrackScreen() {
               </TouchableOpacity>
             </>
           )}
-          {status === 'running' && (
-            <>
-              <TouchableOpacity style={[styles.startButton, { backgroundColor: '#e02424' }]} onPress={() => stop()}>
-                <Text style={[styles.startButtonText, { color: 'white' }]}>Stop Run</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onTakePhoto} style={styles.cameraButton}>
+          {(status === 'running' || status === 'paused') && (
+            <View style={styles.runningActions}>
+              {/* Take Photo Button - Full Width */}
+              <TouchableOpacity onPress={onTakePhoto} style={styles.takePhotoButton}>
                 <Ionicons name="camera" size={28} color={colors.primary} />
+                <Text style={styles.takePhotoText}>Take Photo</Text>
               </TouchableOpacity>
-            </>
-          )}
-          {status === 'paused' && (
-            <>
-              <TouchableOpacity style={styles.startButton} onPress={() => resume()}>
-                <Text style={styles.startButtonText}>Resume</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.startButton, { backgroundColor: '#e02424', flex: 0.5 }]} onPress={() => stop()}>
-                <Text style={[styles.startButtonText, { color: 'white' }]}>Stop</Text>
-              </TouchableOpacity>
-            </>
+              
+              {/* Control Buttons Row */}
+              <View style={styles.controlButtonsRow}>
+                <TouchableOpacity style={styles.stopButton} onPress={() => stop()}>
+                  <Text style={styles.stopButtonText}>Stop Run</Text>
+                </TouchableOpacity>
+                
+                {status === 'running' ? (
+                  <TouchableOpacity onPress={() => pause()} style={styles.pauseButton}>
+                    <Ionicons name="pause" size={24} color={colors.backgroundDark} />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity style={styles.resumeButton} onPress={() => resume()}>
+                    <Ionicons name="play" size={24} color={colors.backgroundDark} />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
           )}
         </View>
       </View>
@@ -163,13 +198,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 24,
   },
+  mapContainer: {
+    position: 'relative',
+    marginBottom: 24,
+  },
   map: {
     width: '100%',
     aspectRatio: 16 / 10,
-    marginBottom: 24,
   },
   mapImage: {
     borderRadius: 16,
+  },
+  trailOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  mapControls: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    flexDirection: 'column',
+    gap: 8,
+  },
+  mapControlButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(246, 248, 246, 0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -221,6 +289,58 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     backgroundColor: `${colors.primary}33`, // 20% opacity
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  runningActions: {
+    flex: 1,
+    gap: 16,
+  },
+  takePhotoButton: {
+    width: '100%',
+    height: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 28,
+    backgroundColor: `${colors.primary}33`, // 20% opacity
+    gap: 8,
+  },
+  takePhotoText: {
+    color: colors.primary,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  controlButtonsRow: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  stopButton: {
+    flex: 1,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#dc2626', // red-600
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stopButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  pauseButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#eab308', // yellow-500
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resumeButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
