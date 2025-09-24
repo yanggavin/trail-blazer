@@ -26,17 +26,10 @@ export default function TrackScreen() {
 
   useEffect(() => {
     if (status === 'finished') {
-      // Save the run to history and navigate to confirmation screen
-      const runData = { distance: distanceMeters, durationSec };
-      const savedRun = useRunStore.getState().saveRunToHistory();
-      if (savedRun) {
-        // Reset the run state for next run
-        useRunStore.getState().reset();
-        // Navigate to confirmation screen with run data
-        navigation.navigate('SavedConfirmation' as never, runData as never);
-      }
+      // Navigate to RunSummary screen to show summary and save options
+      navigation.navigate('RunSummary' as never);
     }
-  }, [status, distanceMeters, durationSec, navigation]);
+  }, [status, navigation]);
 
   const onTakePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
