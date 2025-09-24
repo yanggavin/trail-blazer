@@ -54,6 +54,17 @@ export default function TrackScreenEnhanced() {
         console.warn('⚠️ AMap configuration not available, using Expo Location only');
       }
     }
+    
+    // Set default region for simulator (San Francisco)
+    if (!mapRegion && __DEV__) {
+      console.log('🗺️ Setting default map region for simulator');
+      setMapRegion({
+        latitude: 37.7749,
+        longitude: -122.4194,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -299,11 +310,14 @@ export default function TrackScreenEnhanced() {
               <Text style={styles.mapPlaceholderText}>
                 {hasLocationPermission ? 'Loading map...' : 'Location permission required'}
               </Text>
+              <Text style={styles.mapPlaceholderSubText}>
+                {__DEV__ ? 'Use a physical device for full GPS functionality' : ''}
+              </Text>
             </View>
           )}
           
           {/* Map Controls */}
-          {status !== 'idle' && (
+          {(status !== 'idle' || __DEV__) && (
             <View style={styles.mapControls}>
               <TouchableOpacity 
                 style={styles.mapControlButton}
@@ -315,11 +329,38 @@ export default function TrackScreenEnhanced() {
                       latitudeDelta: 0.005,
                       longitudeDelta: 0.005,
                     }, 1000);
+                  } else if (__DEV__ && mapRef.current) {
+                    // Simulator: animate to default location
+                    mapRef.current.animateToRegion({
+                      latitude: 37.7749,
+                      longitude: -122.4194,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }, 1000);
                   }
                 }}
               >
                 <Ionicons name="locate" size={20} color="#111" />
               </TouchableOpacity>
+              {__DEV__ && !currentLocation && (
+                <TouchableOpacity 
+                  style={styles.mapControlButton}
+                  onPress={() => {
+                    // Simulate location for testing
+                    const simulatedLocation = {
+                      latitude: 37.7749 + (Math.random() - 0.5) * 0.01,
+                      longitude: -122.4194 + (Math.random() - 0.5) * 0.01,
+                      altitude: 100 + Math.random() * 50,
+                      accuracy: 5,
+                      timestamp: Date.now(),
+                    };
+                    setCurrentLocation(simulatedLocation);
+                    console.log('🧪 Simulated location:', simulatedLocation);
+                  }}
+                >
+                  <Ionicons name="location" size={20} color="#111" />
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
@@ -452,6 +493,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: '#666',
     fontSize: 16,
+  },
+  mapPlaceholderSubText: {
+    marginTop: 4,
+    color: '#999',
+    fontSize: 12,
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
   mapControls: {
     position: 'absolute',
