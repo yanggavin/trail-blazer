@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
-import TrackScreen from '../screens/TrackScreen';
+import TrackScreenEnhanced from '../screens/TrackScreenEnhanced';
 import HistoryScreen from '../screens/HistoryScreen';
 import RunDetailsScreen from '../screens/RunDetailsScreen';
 import RunSummaryScreen from '../screens/RunSummaryScreen';
@@ -40,7 +40,7 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="Track" component={TrackScreen} />
+      <Tab.Screen name="Track" component={TrackScreenEnhanced} />
       <Tab.Screen name="History" component={HistoryScreen} />
       <Tab.Screen name="Photos" component={PhotosScreen} />
     </Tab.Navigator>
