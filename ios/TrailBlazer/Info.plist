@@ -46,11 +46,11 @@
     <key>NSCameraUsageDescription</key>
     <string>Trail Blazer uses the camera to capture geo-tagged photos during your runs.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <string>This app needs location access to track your trail runs and show your position on the map.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Trail Blazer uses your location to track distance and pace during runs.</string>
+    <string>This app needs location access to track your trail runs and show your position on the map.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>This app needs location access to track your trail runs in the background.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your microphone</string>
     <key>NSPhotoLibraryAddUsageDescription</key>

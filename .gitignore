@@ -12,3 +12,13 @@ yarn-error.log*
 .idea/
 .vscode/
 coverage/
+
+# Environment variables - DO NOT COMMIT
+.env
+.env.local
+.env.production
+.env.development
+
+# API Keys and Secrets
+config/secrets.json
+secrets/
